@@ -20,8 +20,14 @@ Reclaim/
 ├── frontend/                   React 19 + Vite 8 single-page app
 ├── tools/Reclaim.DataImport/   console app for importing the Kaggle CSV
 ├── docs/                       spec, this file, AI-usage log
+├── neon.ts                     Neon branch policy (applied with `neon deploy`)
+├── package.json                Neon CLI config deps only (@neon/config, @neon/env)
 └── Reclaim.slnx                .NET solution (Api + DataImport)
 ```
+
+Local-only files (gitignored):
+- `.neon`: links this folder to Neon project `falling-term-25296710`, branch `production`.
+- `.env.local`: `DATABASE_URL` (pooled), `DATABASE_URL_UNPOOLED` (direct), and `NEON_BRANCH`, pulled by `neon deploy` or `neon env pull`.
 
 ## How the pieces connect
 
@@ -32,6 +38,7 @@ React (Vite dev server)  ──HTTP/JSON──▶  Reclaim.Api (ASP.NET Core)  �
 ```
 
 - The API is the only component the browser talks to. All SQL is hand-written and run through Dapper.
+- The app uses the **pooled** `DATABASE_URL`. Schema and seed loads use the **direct** `DATABASE_URL_UNPOOLED`, as Neon recommends for migrations.
 - `ItemSecretDetails` must never be sent to non-staff users. The API, not the frontend, enforces this.
 
 ---
@@ -60,26 +67,30 @@ How the seed scripts behave:
 ### Known issues
 - No users, lost reports, claims or secret details are seeded yet.
 
-The schema and seed scripts were tested end to end on PGlite (Postgres 17 compiled to WASM) on 2026-10-21. Every table, all 15 foreign keys, and all 400 items loaded.
+The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM), then loaded into Neon (`reclaimdb`, PostgreSQL 18.6) on 2026-10-21 in a single transaction. Every table, all 15 foreign keys, and all 400 items loaded. **The Neon database is already seeded; don't rerun `03_Items.sql` there.**
 
 ---
 
 ## Backend (`backend/Reclaim.Api`)
 
-**Status:** template only. `WeatherForecastController` and `WeatherForecast.cs` are scaffold leftovers and should be deleted.
+**Status:** connected to Neon. No feature endpoints yet.
 
 | Concern | Current state |
 |---|---|
 | Packages | Dapper, Npgsql, BCrypt.Net-Next, FuzzySharp, Swashbuckle, Microsoft.AspNetCore.OpenApi |
-| `Program.cs` | Controllers + OpenAPI only. No DB connection, no CORS, no auth |
-| Connection string | Not configured. Plan: keep it in user-secrets or `.env` (gitignored), never in `appsettings.json` |
+| `Program.cs` | Loads `.env.local`, registers one `NpgsqlDataSource` singleton, controllers + OpenAPI. No CORS or auth yet |
+| `EnvFile.cs` | Walks up from the working directory to the nearest `.env.local` and loads it into environment variables. Never overrides variables that are already set |
+| `Data/DatabaseUrl.cs` | Converts Neon's `postgresql://` URL to an Npgsql connection string (SSL required, plus channel binding when the URL asks for it) |
+| Connection string | `DATABASE_URL` from `.env.local` or the environment. The API won't start without it. Never put it in `appsettings.json` |
 | Ports | http://localhost:5102, https://localhost:7209 |
 
+**Data access pattern:** inject `NpgsqlDataSource`, then `await using var connection = await dataSource.OpenConnectionAsync();` and run Dapper queries on it.
+
 ### Endpoints
-_None yet._ List each endpoint here when it's added:
 
 | Method | Route | Role | Description | Tables |
 |---|---|---|---|---|
+| GET | `/health/db` | any | Returns the Postgres version and item count to prove the API can reach Neon | items |
 
 ---
 
@@ -93,7 +104,6 @@ _None yet._ List each endpoint here when it's added:
 
 **Status:** `App.jsx` renders only a placeholder heading. There's no routing and no API client. `index.css` contains minimal base styles.
 
-- Known bug: `index.html` has a malformed `<title>frontend<title>Reclaim</title>`.
 - `frontend/README.md` is the unchanged Vite template README.
 
 ### Pages
@@ -103,9 +113,11 @@ _None yet._ List each page/route here as it's added.
 
 ## Local setup
 
-1. **Database:** create the Neon database, then run `database/tables/*.sql` and `database/seed/*.sql`, each in filename order (pgAdmin 4 or `psql`). The connection string goes in `.env` / `.env.local`; both are gitignored.
-2. **API:** `dotnet run --project backend/Reclaim.Api`. Swagger/OpenAPI is served in Development.
-3. **Frontend:** `cd frontend && npm install && npm run dev`.
+1. **Neon CLI:** `npm i -g neon`, then `neon login`.
+2. **Connection string:** from the repo root, run `neon link --project-id falling-term-25296710` (once per machine), then `neon env pull`. This writes `.env.local`.
+3. **Database** (only for a fresh branch; `production` is already loaded): run `database/tables/*.sql`, then `database/seed/*.sql`, each in filename order, over `DATABASE_URL_UNPOOLED` (pgAdmin 4 or `psql`).
+4. **API:** `dotnet run --project backend/Reclaim.Api --launch-profile http`, then open http://localhost:5102/health/db to check the connection. OpenAPI is at `/openapi/v1.json` in Development.
+5. **Frontend:** `cd frontend && npm install && npm run dev`.
 
 _These steps become the Stage 7 setup instructions, so keep them accurate._
 
@@ -115,8 +127,9 @@ _These steps become the Stage 7 setup instructions, so keep them accurate._
 
 | Feature (from spec) | Status |
 |---|---|
-| Schema (9 tables) | Done; tested locally, not yet loaded on Neon |
-| Real data: categories, locations, items | Seed SQL written (400 items) |
+| Schema (9 tables) | Done; loaded on Neon |
+| Real data: categories, locations, items | Loaded on Neon (13 / 104 / 400) |
+| API ↔ Neon connection | Done (`/health/db`) |
 | Test users / lost reports / claims / secret details | Not started |
 | Insert/update/delete (users: lost reports; staff: everything) | Not started |
 | Search by name / location / category | Not started |
