@@ -249,16 +249,16 @@ WITH seed_items (name, description, category, building, date_found) AS (
     ('Jewelry', 'jewelry.', 'Jewelry & Accessories', 'Quaker Residence Hall', '2026-03-01'),
     ('Wallet or purse', 'wallet or purse.', 'Wallets & Purses', 'InfoCision Stadium Summa Field', '2026-03-01'),
     ('Bottle', 'bottle.', 'Food & Drink Containers', 'Exchange Street Complex - Dining', '2026-03-01'),
-    ('Wallet or purse', 'wallet or purse.', 'Wallets & Purses', 'Superior Building', '2026-02-29'),
-    ('Black Bag', 'bag.', 'Bags & Luggage', 'Dave''s Market', '2026-02-29'),
-    ('Bottle', 'bottle.', 'Food & Drink Containers', 'Whitby Hall', '2026-02-29'),
-    ('Electronic device', 'electronic device.', 'Electronics', 'Exchange Street Complex - Dining', '2026-02-29'),
-    ('Shoes', 'shoes.', 'Clothing', 'Alpha Gamma Delta', '2026-02-29'),
-    ('Wallet or purse', 'wallet or purse.', 'Wallets & Purses', 'Louis and Freda Stile Athletic Field House', '2026-02-29'),
-    ('Watch', 'watch.', 'Jewelry & Accessories', 'Lincoln Building', '2026-02-29'),
-    ('Black Shirt', 'shirt.', 'Clothing', 'Exchange Street Complex - Dining', '2026-02-29'),
-    ('Bag', 'bag.', 'Bags & Luggage', 'Polsky Building', '2026-02-29'),
-    ('Earbuds', 'earbuds.', 'Electronics', 'Mary Gladwin Hall', '2026-02-29'),
+    ('Wallet or purse', 'wallet or purse.', 'Wallets & Purses', 'Superior Building', '2026-02-28'),
+    ('Black Bag', 'bag.', 'Bags & Luggage', 'Dave''s Market', '2026-02-28'),
+    ('Bottle', 'bottle.', 'Food & Drink Containers', 'Whitby Hall', '2026-02-28'),
+    ('Electronic device', 'electronic device.', 'Electronics', 'Exchange Street Complex - Dining', '2026-02-28'),
+    ('Shoes', 'shoes.', 'Clothing', 'Alpha Gamma Delta', '2026-02-28'),
+    ('Wallet or purse', 'wallet or purse.', 'Wallets & Purses', 'Louis and Freda Stile Athletic Field House', '2026-02-28'),
+    ('Watch', 'watch.', 'Jewelry & Accessories', 'Lincoln Building', '2026-02-28'),
+    ('Black Shirt', 'shirt.', 'Clothing', 'Exchange Street Complex - Dining', '2026-02-28'),
+    ('Bag', 'bag.', 'Bags & Luggage', 'Polsky Building', '2026-02-28'),
+    ('Earbuds', 'earbuds.', 'Electronics', 'Mary Gladwin Hall', '2026-02-28'),
     ('Blue Bag', 'bag.', 'Bags & Luggage', 'Ritchie Residence Hall', '2026-02-28'),
     ('Found item', 'found item.', 'Other', 'Lincoln Building', '2026-02-28'),
     ('Blue Phone', 'phone.', 'Electronics', 'Engineering Research Center', '2026-02-28'),
@@ -403,11 +403,11 @@ WITH seed_items (name, description, category, building, date_found) AS (
 ),
 building_locations AS (
     SELECT building, MIN(location_id) AS location_id
-    FROM "Locations"
+    FROM Locations
     WHERE room_or_area IS NULL
     GROUP BY building
 )
-INSERT INTO "Items" (
+INSERT INTO Items (
     name, description, category_id, found_location_id, date_found, status
 )
 SELECT
@@ -418,5 +418,5 @@ SELECT
     CAST(i.date_found AS DATE),
     'stored'
 FROM seed_items AS i
-JOIN "Categories" AS c ON c.name = i.category
+JOIN Categories AS c ON c.name = i.category
 JOIN building_locations AS l ON l.building = i.building;
