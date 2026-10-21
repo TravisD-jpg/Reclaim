@@ -1,6 +1,6 @@
 @Reclaim.Api_HostAddress = http://localhost:5102
 
-GET {{Reclaim.Api_HostAddress}}/weatherforecast/
+GET {{Reclaim.Api_HostAddress}}/health/db
 Accept: application/json
 
 ###
