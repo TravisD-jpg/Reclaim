@@ -121,6 +121,16 @@ _None yet._ List each page/route here as it's added.
 
 _These steps become the Stage 7 setup instructions, so keep them accurate._
 
+### New teammate checklist
+1. Accept the Neon organization invite.
+2. Install Node.js 24 and the .NET 10 SDK, then `npm i -g neon` and `neon login`.
+3. Pull the `dev` branch, then run from the repo root:
+   `neon link --org-id org-cold-lab-38223341 --project-id falling-term-25296710 --branch production -y`
+   and then `neon env pull`.
+4. Start the API from the repo root with `dotnet run --project backend/Reclaim.Api --launch-profile http`, then open http://localhost:5102/health/db. It should return `itemCount: 400`.
+
+Everyone shares the `production` database, so writes are visible to the whole team. Never rerun the seed scripts against it.
+
 ---
 
 ## Feature status vs. spec
