@@ -138,8 +138,6 @@ Users log in, browse a catalog of lost items, and search by **name, location and
   - **Failed check-out attempts are recorded, along with who made them.**
 - **Why it's new:** Verification happens in the database itself, not just as a listing website.
 
-> ⚠️ **575 check:** if either team member is enrolled in 575, a **third** advanced function is required and has not been proposed yet.
-
 ---
 
 ## 4. Development plan (Stage 3)
