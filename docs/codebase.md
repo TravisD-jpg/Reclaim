@@ -20,7 +20,7 @@ Reclaim/
 │   └── data/                   raw source data (gitignored)
 ├── frontend/                   React 19 + Vite 8 single-page app
 ├── tools/Reclaim.DataImport/   console app for importing the Kaggle CSV
-├── docs/                       spec, this file, AI-usage log
+├── docs/                       spec, roadmap, this file, AI-usage log, demo scripts
 ├── neon.ts                     Neon branch policy (applied with `neon deploy`)
 ├── package.json                Neon CLI config deps only (@neon/config, @neon/env)
 └── Reclaim.slnx                .NET solution (Api + DataImport)

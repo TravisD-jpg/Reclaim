@@ -43,15 +43,8 @@ Goal: everything Stage 4 asks us to demo.
 
 ## Phase 2 — Stage 4 demo and report (due **Oct 26**)
 - [x] Make the seed items realistic: many share the same generic name and description (e.g. "Jewelry" / "Metal jewelry."), so give each a distinct name and description before the demo
-- [ ] Demo script, 5–8 minutes:
-  - show real data;
-  - insert, update and delete an item;
-  - run a search;
-  - show the history join;
-  - explain the advanced-function plan.
-- [ ] Rehearse the demo against the time limit
+- [x] Demo script, 5–8 minutes: talking points in [demo-stage4.md](demo-stage4.md)
 - [ ] Stage 4 report: title, summary, database and platforms, real data source, function descriptions, advanced-function plan
-- [ ] AI appendix from [ai-usage.md](ai-usage.md)
 
 ## Phase 3 — Login and roles (early Nov)
 Needed before Identity Verification, because it depends on staff-only permissions.
@@ -73,7 +66,6 @@ Needed before Identity Verification, because it depends on staff-only permission
 
 ## Phase 5 — Stage 5 progress report (due **Nov 25**)
 - [ ] Current status, real data summary, and how Smart Search is implemented
-- [ ] AI appendix
 
 ## Phase 6 — Advanced Function 2: Identity Verification (due **Nov 27**)
 - [ ] Staff add or edit secret details when logging an item; never returned to non-staff users
