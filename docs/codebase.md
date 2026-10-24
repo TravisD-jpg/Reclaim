@@ -171,7 +171,8 @@ React 19 + Vite 8, with **Mantine 9** (components, plus `@mantine/form` for form
 | `/` | `CatalogPage` | everyone | Done. Search box (debounced 300 ms), category, building and status filters, all sent to `GET /api/items`. Shows `stored` items by default; table of 25 per page. Clicking a row opens its detail page. Staff see a **Log item** button |
 | `/items/:id` | `ItemDetailPage` | everyone | Done. Shows `GET /api/items/{id}/history`: item details (category, building and room, date found, logged by) and its claim (date, claimant, approving staff, linked lost report). Claimant email and failed verification count show only for staff. Staff also get **Edit** and **Delete** (with a confirm dialog; the API's 409 message shows if the item has claims) |
 | `/items/new`, `/items/:id/edit` | `ItemFormPage` | staff/dev (buttons hidden otherwise) | Done. One form for both: name, description, category, building, date found (native date input), status, photo URL. `POST` or `PUT /api/items`, then opens the item. Status offers only stored/disposed; `claimed` is set by the claims endpoints, so a claimed item's status is locked |
-| `/lost-reports` | `LostReportsPage` | everyone | Placeholder |
+| `/lost-reports` | `LostReportsPage` | everyone | Done. Table of reports from `GET /api/lost-reports`, newest first. Staff see every report with a "Reported by" column; everyone else sees only their own (`?userId=`). **Report lost item** button for everyone |
+| `/lost-reports/new` | `LostReportFormPage` | everyone | Done. Name, description, category, last-seen building, date lost. `POST /api/lost-reports` as the "Acting as" account, then back to the list. Status starts `open` |
 | `/claims` | `ClaimsPage` | staff/dev (nav link hidden otherwise) | Placeholder |
 
 ---

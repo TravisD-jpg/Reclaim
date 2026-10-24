@@ -39,7 +39,7 @@ Goal: everything Stage 4 asks us to demo.
 - [x] Catalog page with search and filters
 - [x] Item detail page with history
 - [x] Add/edit item form (staff), plus delete on the detail page
-- [ ] Lost report form
+- [x] Lost report form, plus the lost reports list
 
 ## Phase 2 — Stage 4 demo and report (due **Oct 26**)
 - [ ] Make the seed items realistic: many share the same generic name and description (e.g. "Jewelry" / "Metal jewelry."), so give each a distinct name and description before the demo
