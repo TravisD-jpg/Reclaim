@@ -59,18 +59,20 @@ Table names are unquoted, so Postgres stores them in lowercase (`items`, `lostre
 | `01_Categories.sql` | categories | 13 | Team-defined categories |
 | `02_Locations.sql` | locations | 104 buildings (`room_or_area` NULL) | UA campus map |
 | `03_Items.sql` | items | 400 | Cleaned rows from the Kaggle dataset, with stations mapped to UA buildings; all set to `status = 'stored'`. Dates span 2026-02-19 to 2026-03-21; 10 rows dated Feb 29 (invalid in 2026) were moved to Feb 28 |
-| `04_Users.sql` | users | 3 | One test account per role: `dev`, `staff`, `user`. Passwords are base64-encoded (see deviations) |
+| `04_Users.sql` | users | 20 | Team-entered accounts: 2 `dev` (Travis, Davonte), 3 `staff` (one per lost-and-found desk), 15 `user` students. UANet-style emails and 7-digit UA IDs. Every demo password is `reclaim`, base64-encoded (see deviations) |
 | `05_ItemSecretDetails.sql` | itemsecretdetails | 40 | Hidden details on seeded items (e.g. "Broken zipper"), matched by item name, building and date found |
+| `06_LostReports.sql` | lostreports | 6 | Filed by 6 different students: 3 `closed` (item returned), 3 `open`. "Navy blue jacket" describes a real stored item, a known answer for Smart Search |
+| `07_Claims.sql` | claims | 4 | Each approved by a staff member: 3 linked to a lost report, 1 walk-in (`report_id` NULL). Sets those items to `claimed` |
 
 How the seed scripts behave:
-- They can be re-run safely: categories use `ON CONFLICT DO NOTHING`, and locations use a `WHERE NOT EXISTS` check.
-- `03_Items.sql` looks up category and location ids by name. **It is not safe to re-run; it will insert duplicates.**
+- Seeds look up related rows by natural keys (category name, building, user email, item name + building + date found), never by hard-coded IDs.
+- **Safe to rerun:** `01`, `02`, `04`, `06`, `07` (they skip rows that already exist).
+- **Not safe to rerun:** `03` and `05` insert duplicates.
 
 ### Known issues
-- No lost reports or claims are seeded yet.
 - `Users.role` allows `user`, `staff` and `dev`.
 
-The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM), then loaded into Neon (`reclaimdb`, PostgreSQL 18.6) on 2026-10-21 in a single transaction. Every table, all 15 foreign keys, and all 400 items loaded. **The Neon database is already seeded; don't rerun `03_Items.sql` there.**
+The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM), then loaded into Neon (`reclaimdb`, PostgreSQL 18.6). `01`–`03` were loaded on 2026-10-21 and `05` by Davonte. On 2026-10-24 the original placeholder users were replaced with `04`'s realistic users, and `06`–`07` were loaded. **Neon is fully seeded; don't rerun the unsafe seeds there.**
 
 ---
 
@@ -159,8 +161,8 @@ Everyone shares the `production` database, so writes are visible to the whole te
 | Schema (9 tables) | Done; loaded on Neon |
 | Real data: categories, locations, items | Loaded on Neon (13 / 104 / 400) |
 | API ↔ Neon connection | Done (`/health/db`) |
-| Test users / secret details | Seeded (3 users, 40 details) |
-| Test lost reports / claims | Not started |
+| Test users / secret details | Seeded (20 users, 40 details) |
+| Test lost reports / claims | Seeded (6 reports, 4 claims) |
 | Insert/update/delete (users: lost reports; staff: everything) | Not started |
 | Search by name / location / category | Not started |
 | Item-history join (status, claim date, approving staff, found location) | Not started |

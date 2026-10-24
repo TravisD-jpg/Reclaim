@@ -19,9 +19,9 @@ _Last updated: 2026-10-21_
 Goal: everything Stage 4 asks us to demo.
 
 **Data**
-- [x] Seed test users: one per role (`dev`, `staff`, `user`), base64 passwords for now
+- [x] Seed 20 team-entered users (2 dev, 3 staff, 15 students), base64 passwords for now
 - [x] Seed secret details for 40 items (used later by Identity Verification)
-- [ ] Seed a handful of lost reports and claims so the history join returns real rows
+- [x] Seed a handful of lost reports and claims so the history join returns real rows
 
 **API**
 - [ ] Vite dev-server proxy for `/api` (replaces CORS; done with the frontend)
