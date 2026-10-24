@@ -1,6 +1,144 @@
 @Reclaim.Api_HostAddress = http://localhost:5102
 
-GET {{Reclaim.Api_HostAddress}}/weatherforecast/
+GET {{Reclaim.Api_HostAddress}}/health/db
 Accept: application/json
+
+###
+
+GET {{Reclaim.Api_HostAddress}}/api/categories
+
+###
+
+GET {{Reclaim.Api_HostAddress}}/api/locations
+
+###
+
+# Search: any mix of search, categoryId, locationId, status
+GET {{Reclaim.Api_HostAddress}}/api/items?search=earbuds&categoryId=2
+
+###
+
+GET {{Reclaim.Api_HostAddress}}/api/items/1
+
+###
+
+# Multi-table join: 299 is claimed through a lost report, 1 is a walk-in claim, 2 is unclaimed
+GET {{Reclaim.Api_HostAddress}}/api/items/299/history
+
+###
+
+POST {{Reclaim.Api_HostAddress}}/api/items
+Content-Type: application/json
+
+{
+  "name": "Blue Umbrella",
+  "description": "Compact umbrella with a wooden handle",
+  "categoryId": 13,
+  "foundLocationId": 23,
+  "dateFound": "2026-10-24"
+}
+
+###
+
+# Replace 401 with the itemId returned by the POST above
+PUT {{Reclaim.Api_HostAddress}}/api/items/401
+Content-Type: application/json
+
+{
+  "name": "Blue Umbrella",
+  "description": "Compact umbrella with a wooden handle",
+  "categoryId": 13,
+  "foundLocationId": 23,
+  "dateFound": "2026-10-24",
+  "status": "disposed"
+}
+
+###
+
+DELETE {{Reclaim.Api_HostAddress}}/api/items/401
+
+###
+
+GET {{Reclaim.Api_HostAddress}}/api/users
+
+###
+
+# Search: any mix of search, userId, status
+GET {{Reclaim.Api_HostAddress}}/api/lost-reports?status=open
+
+###
+
+GET {{Reclaim.Api_HostAddress}}/api/lost-reports/1
+
+###
+
+# userId 11 is Sofia Romano on Neon; check GET /api/users
+POST {{Reclaim.Api_HostAddress}}/api/lost-reports
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "name": "Red scarf",
+  "description": "Knitted red scarf with fringe",
+  "categoryId": 6,
+  "lastSeenLocationId": 23,
+  "dateLost": "2026-10-23"
+}
+
+###
+
+# Replace 7 with the reportId returned by the POST above
+PUT {{Reclaim.Api_HostAddress}}/api/lost-reports/7
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "name": "Red scarf",
+  "description": "Knitted red scarf with fringe",
+  "categoryId": 6,
+  "lastSeenLocationId": 23,
+  "dateLost": "2026-10-23",
+  "status": "closed"
+}
+
+###
+
+DELETE {{Reclaim.Api_HostAddress}}/api/lost-reports/7
+
+###
+
+# Search: any mix of itemId, userId (claimant), approvedBy
+GET {{Reclaim.Api_HostAddress}}/api/claims
+
+###
+
+# Ids on Neon: Marcus Bell = 10, his "Navy blue jacket" report = 6, Kevin Okafor (staff) = 4.
+# Also marks item 92 claimed and closes report 6. claimDate defaults to now.
+POST {{Reclaim.Api_HostAddress}}/api/claims
+Content-Type: application/json
+
+{
+  "itemId": 92,
+  "userId": 10,
+  "reportId": 6,
+  "approvedBy": 4
+}
+
+###
+
+# Replace 5 with the claimId returned above. Unlinking the report reopens it.
+PUT {{Reclaim.Api_HostAddress}}/api/claims/5
+Content-Type: application/json
+
+{
+  "userId": 10,
+  "reportId": null,
+  "approvedBy": 5
+}
+
+###
+
+# Undo the claim: item 92 goes back to stored and its report reopens
+DELETE {{Reclaim.Api_HostAddress}}/api/claims/5
 
 ###

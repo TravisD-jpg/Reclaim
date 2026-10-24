@@ -482,4 +482,6 @@ $RECYCLE.BIN/
 *.swp
 
 .env
+.env.local
 database/data/
+.neon

@@ -1,0 +1,28 @@
+.header {
+  background-color: var(--mantine-color-akronBlue-9);
+  border-bottom: 3px solid var(--mantine-color-akronGold-6);
+}
+
+.brand {
+  color: var(--mantine-color-white);
+  text-decoration: none;
+}
+
+.link {
+  color: var(--mantine-color-akronBlue-0);
+  text-decoration: none;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--mantine-radius-md);
+}
+
+.link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* react-router's NavLink adds .active to the current page */
+.link:global(.active) {
+  color: var(--mantine-color-akronBlue-9);
+  background-color: var(--mantine-color-akronGold-6);
+}
