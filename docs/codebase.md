@@ -153,6 +153,9 @@ React 19 + Vite 8, with **Mantine 9** (components), **React Router 8** (pages), 
 | `src/layout/AppLayout.jsx` | Navy header with gold underline: logo, nav links (Claims shows only for staff/dev), account switch. Pages render in a gray content area |
 | `src/layout/PageHeader.jsx` | Shared page title, description, and action buttons |
 | `src/pages/` | One component per route |
+| `src/components/StatusBadge.jsx` | Colored badge for item and lost report statuses |
+| `src/hooks/useLookups.js` | Loads categories and locations as Select options (`categoryOptions`, `locationOptions`) for filters and forms |
+| `src/format.js` | `formatDate` ("Mar 21, 2026") and `formatDateTime`; dates are parsed by parts so time zones can't shift the day |
 
 **Conventions:**
 - Use Mantine components and theme colors (`akronBlue`, `akronGold`) instead of custom CSS. Custom CSS goes in a `*.module.css` next to its component.
@@ -165,7 +168,7 @@ React 19 + Vite 8, with **Mantine 9** (components), **React Router 8** (pages), 
 ### Pages
 | Route | Page | Who | Status |
 |---|---|---|---|
-| `/` | `CatalogPage` | everyone | Placeholder (shows the item count) |
+| `/` | `CatalogPage` | everyone | Done. Search box (debounced 300 ms), category, building and status filters, all sent to `GET /api/items`. Shows `stored` items by default; table of 25 per page |
 | `/lost-reports` | `LostReportsPage` | everyone | Placeholder |
 | `/claims` | `ClaimsPage` | staff/dev (nav link hidden otherwise) | Placeholder |
 

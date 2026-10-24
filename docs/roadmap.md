@@ -36,7 +36,7 @@ Goal: everything Stage 4 asks us to demo.
 **Frontend**
 - [x] Mantine setup with UA theme, routing, app layout, and an API client
 - [x] Temporary "Acting as" account switch in the header (replaced by login in Phase 3)
-- [ ] Catalog page with search and filters
+- [x] Catalog page with search and filters
 - [ ] Item detail page with history
 - [ ] Add/edit item form (staff)
 - [ ] Lost report form
