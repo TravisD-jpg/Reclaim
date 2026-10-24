@@ -25,7 +25,7 @@ Goal: everything Stage 4 asks us to demo.
 
 **API**
 - [ ] CORS for the Vite dev server
-- [ ] `GET /categories`, `GET /locations` (for form dropdowns)
+- [x] `GET /api/categories`, `GET /api/locations` (for form dropdowns)
 - [ ] Items CRUD: `GET /items`, `GET /items/{id}`, `POST`, `PUT`, `DELETE`
 - [ ] Item search: name (partial match), location, category, and status filters on `GET /items`
 - [ ] Item history join: `GET /items/{id}/history`, joining item, category, found location, logged-by staff, claim, claimant, and approving staff
@@ -34,6 +34,7 @@ Goal: everything Stage 4 asks us to demo.
 
 **Frontend**
 - [ ] Routing and an API client
+- [ ] Temporary user/staff switch in the header (replaced by login in Phase 3)
 - [ ] Catalog page with search and filters
 - [ ] Item detail page with history
 - [ ] Add/edit item form (staff)
@@ -97,4 +98,4 @@ Needed before Identity Verification, because it depends on staff-only permission
 | Question | Why it matters | Decide by |
 |---|---|---|
 | Finish the CSV import tool, or keep the SQL seed? | Stage 3 promised a C# import tool and ~10,000 records | Oct 26 (explain in the Stage 4 report) |
-| What does the Oct 26 demo do without login? | Login is in Phase 3. Options: a temporary role switch in the UI, or move login into Phase 1 | Oct 23 |
+| ~~What does the Oct 26 demo do without login?~~ | **Decided Oct 24:** a temporary user/staff switch in the header. Real login stays in Phase 3 | — |

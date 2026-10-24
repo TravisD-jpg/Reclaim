@@ -87,13 +87,20 @@ The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM)
 | Connection string | `DATABASE_URL` from `.env.local` or the environment. The API won't start without it. Never put it in `appsettings.json` |
 | Ports | http://localhost:5102, https://localhost:7209 |
 
-**Data access pattern:** inject `NpgsqlDataSource`, then `await using var connection = await dataSource.OpenConnectionAsync();` and run Dapper queries on it.
+**Data access pattern:**
+- Inject `NpgsqlDataSource`, then `await using var connection = await dataSource.OpenConnectionAsync();` and run Dapper queries on it.
+- Each controller holds its own SQL as plain strings, using C# raw strings (`"""`) for multi-line queries.
+- `DefaultTypeMap.MatchNamesWithUnderscores = true` (set in `Program.cs`) maps snake_case columns like `category_id` to PascalCase properties like `CategoryId`, so queries select real column names without aliases.
+- Response shapes live in `Models/` as records. JSON output is camelCase (`categoryId`).
+- Feature routes are prefixed with `api/`.
 
 ### Endpoints
 
 | Method | Route | Role | Description | Tables |
 |---|---|---|---|---|
 | GET | `/health/db` | any | Returns the Postgres version and item count to prove the API can reach Neon | items |
+| GET | `/api/categories` | any | All categories, sorted by name (for dropdowns) | categories |
+| GET | `/api/locations` | any | All locations, sorted by building (for dropdowns) | locations |
 
 ---
 

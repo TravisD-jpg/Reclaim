@@ -1,8 +1,12 @@
+using Dapper;
 using Npgsql;
 using Reclaim.Api;
 using Reclaim.Api.Data;
 
 EnvFile.Load();
+
+// Lets Dapper map snake_case columns (category_id) to PascalCase properties (CategoryId).
+DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 var builder = WebApplication.CreateBuilder(args);
 
