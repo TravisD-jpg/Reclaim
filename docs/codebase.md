@@ -140,12 +140,34 @@ The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM)
 
 ## Frontend (`frontend/`)
 
-**Status:** `App.jsx` renders only a placeholder heading. There's no routing and no API client. `index.css` contains minimal base styles.
+React 19 + Vite 8, with **Mantine 9** (components), **React Router 8** (pages), and **Tabler icons**. Plain JavaScript, no TypeScript.
+
+| File / folder | Purpose |
+|---|---|
+| `vite.config.js` | Dev server proxies `/api` to http://localhost:5102, so the browser only talks to one origin and the API needs no CORS setup |
+| `src/main.jsx` | Wraps the app in `MantineProvider` (theme), `Notifications` (toasts), `BrowserRouter`, and `AccountProvider` |
+| `src/App.jsx` | Route table; every page renders inside `AppLayout` |
+| `src/theme.js` | UA navy (`akronBlue`, #041E42) and gold (`akronGold`, #A89968) as Mantine colors; navy is the primary color |
+| `src/api.js` | `api.get/post/put/delete(path, body)`. Prefixes `/api`, sends JSON, and throws an `Error` with a readable message from the API's validation or plain-text errors |
+| `src/account/` | The demo's "Acting as" switch. `AccountProvider` loads `/api/users` and remembers the choice in localStorage; `useAccount()` returns `{ users, account, isStaff, setUserId }`; `AccountSwitch` is the grouped dropdown in the header. Defaults to the first staff member. **Replaced by login in Phase 3** |
+| `src/layout/AppLayout.jsx` | Navy header with gold underline: logo, nav links (Claims shows only for staff/dev), account switch. Pages render in a gray content area |
+| `src/layout/PageHeader.jsx` | Shared page title, description, and action buttons |
+| `src/pages/` | One component per route |
+
+**Conventions:**
+- Use Mantine components and theme colors (`akronBlue`, `akronGold`) instead of custom CSS. Custom CSS goes in a `*.module.css` next to its component.
+- Pages call the API through `api.js`, never `fetch` directly.
+- Hide staff-only actions with `isStaff` from `useAccount()`.
+- Show failures with `notifications.show({ color: 'red', ... })`.
 
 - `frontend/README.md` is the unchanged Vite template README.
 
 ### Pages
-_None yet._ List each page/route here as it's added.
+| Route | Page | Who | Status |
+|---|---|---|---|
+| `/` | `CatalogPage` | everyone | Placeholder (shows the item count) |
+| `/lost-reports` | `LostReportsPage` | everyone | Placeholder |
+| `/claims` | `ClaimsPage` | staff/dev (nav link hidden otherwise) | Placeholder |
 
 ---
 
@@ -155,7 +177,7 @@ _None yet._ List each page/route here as it's added.
 2. **Connection string:** from the repo root, run `neon link --project-id falling-term-25296710` (once per machine), then `neon env pull`. This writes `.env.local`.
 3. **Database** (only for a fresh branch; `production` is already loaded): run `database/tables/*.sql`, then `database/seed/*.sql`, each in filename order, over `DATABASE_URL_UNPOOLED` (pgAdmin 4 or `psql`).
 4. **API:** `dotnet run --project backend/Reclaim.Api --launch-profile http`, then open http://localhost:5102/health/db to check the connection. OpenAPI is at `/openapi/v1.json` in Development.
-5. **Frontend:** `cd frontend && npm install && npm run dev`.
+5. **Frontend:** `cd frontend && npm install && npm run dev`, then open http://localhost:5173. The API must be running too, since Vite forwards `/api` calls to it.
 
 _These steps become the Stage 7 setup instructions, so keep them accurate._
 

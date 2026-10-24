@@ -24,7 +24,7 @@ Goal: everything Stage 4 asks us to demo.
 - [x] Seed a handful of lost reports and claims so the history join returns real rows
 
 **API**
-- [ ] Vite dev-server proxy for `/api` (replaces CORS; done with the frontend)
+- [x] Vite dev-server proxy for `/api` (replaces CORS)
 - [x] `GET /api/categories`, `GET /api/locations` (for form dropdowns)
 - [x] Items CRUD: `GET /api/items`, `GET /api/items/{id}`, `POST`, `PUT`, `DELETE`
 - [x] Item search: name/description (partial match), location, category, and status filters on `GET /api/items`
@@ -34,8 +34,8 @@ Goal: everything Stage 4 asks us to demo.
 - [x] Claims CRUD (`/api/claims`), with item and report statuses kept in sync
 
 **Frontend**
-- [ ] Routing and an API client
-- [ ] Temporary user/staff switch in the header (replaced by login in Phase 3)
+- [x] Mantine setup with UA theme, routing, app layout, and an API client
+- [x] Temporary "Acting as" account switch in the header (replaced by login in Phase 3)
 - [ ] Catalog page with search and filters
 - [ ] Item detail page with history
 - [ ] Add/edit item form (staff)

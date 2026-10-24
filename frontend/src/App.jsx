@@ -1,9 +1,18 @@
+import { Route, Routes } from 'react-router'
+import { AppLayout } from './layout/AppLayout'
+import { CatalogPage } from './pages/CatalogPage'
+import { ClaimsPage } from './pages/ClaimsPage'
+import { LostReportsPage } from './pages/LostReportsPage'
+
 function App() {
   return (
-    <main>
-      <h1>Reclaim</h1>
-      <p>Campus lost and found</p>
-    </main>
+    <Routes>
+      <Route element={<AppLayout />}>
+        <Route index element={<CatalogPage />} />
+        <Route path="lost-reports" element={<LostReportsPage />} />
+        <Route path="claims" element={<ClaimsPage />} />
+      </Route>
+    </Routes>
   )
 }
 
