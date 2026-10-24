@@ -31,7 +31,7 @@ Goal: everything Stage 4 asks us to demo.
 - [x] Item history join: `GET /api/items/{id}/history`, joining item, category, found location, logged-by staff, claim, claimant, and approving staff
 - [x] Lost reports CRUD (`/api/lost-reports`)
 - [x] `GET /api/users` for the account switch
-- [ ] Claims CRUD (staff)
+- [x] Claims CRUD (`/api/claims`), with item and report statuses kept in sync
 
 **Frontend**
 - [ ] Routing and an API client

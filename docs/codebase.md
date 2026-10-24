@@ -50,6 +50,8 @@ There are 9 tables, one script each in `database/tables/`. Column for column the
 
 The files are numbered `01_Users.sql` … `09_MatchCandidates.sql` in foreign-key order. Run them in filename order.
 
+`00_Timezone.sql` runs first and sets the database's time zone to `America/New_York`, so timestamps are Akron time. Neon's pooled connections can keep UTC, so **API inserts that default to "now" use `CURRENT_TIMESTAMP AT TIME ZONE 'America/New_York'` explicitly** (see `POST /api/claims`). Applied to Neon on 2026-10-24.
+
 Table names are unquoted, so Postgres stores them in lowercase (`items`, `lostreports`, …). **Never double-quote identifiers in SQL or Dapper queries**: `"Items"` refers to a different, nonexistent table.
 
 ### Seed data (`database/seed/`)
@@ -95,6 +97,7 @@ The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM)
 - `DefaultTypeMap.MatchNamesWithUnderscores = true` (set in `Program.cs`) maps snake_case columns like `category_id` to PascalCase properties like `CategoryId`, so queries select real column names without aliases.
 - Response shapes live in `Models/` as records. JSON output is camelCase (`categoryId`).
 - Feature routes are prefixed with `api/`.
+- Writes that touch several tables (claims) run in one transaction (`BeginTransactionAsync`), so they all succeed or none do. Rules the schema can't express (approver must be staff) are checked inside that transaction.
 
 ### Endpoints
 
@@ -116,6 +119,12 @@ The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM)
 | POST | `/api/lost-reports` | any | File a report; `userId` required, status defaults to `open`. 201, or 400 on validation errors or a nonexistent user/category/location | lostreports |
 | PUT | `/api/lost-reports/{id}` | owner/staff* | Replace a report's fields; 404 if missing | lostreports |
 | DELETE | `/api/lost-reports/{id}` | owner/staff* | Delete a report; 204, 404 if missing, 409 if a claim or match links to it (close it instead) | lostreports |
+
+| GET | `/api/claims` | staff* | List claims with item, claimant, approver and report names. Optional `itemId`, `userId`, `approvedBy`. Newest first | claims, items, users (×2), lostreports |
+| GET | `/api/claims/{id}` | staff* | One claim; 404 if missing | same |
+| POST | `/api/claims` | staff* | Approve a claim. **One transaction:** insert the claim, set the item to `claimed`, close the linked report. 400 if the approver isn't staff/dev, the report isn't the claimant's, or the item/claimant doesn't exist; 409 if the item isn't `stored` | claims, items, lostreports |
+| PUT | `/api/claims/{id}` | staff* | Change claimant, report, approver or date (not the item). If the report changes, the old one reopens and the new one closes | claims, lostreports |
+| DELETE | `/api/claims/{id}` | staff* | Undo a claim. **One transaction:** delete it, set the item back to `stored`, reopen the linked report | claims, items, lostreports |
 
 \* Roles aren't enforced yet; the frontend's user/staff switch hides staff actions until login lands (roadmap Phase 3). `logged_by` is left NULL until then.
 
@@ -171,7 +180,7 @@ Everyone shares the `production` database, so writes are visible to the whole te
 | API ↔ Neon connection | Done (`/health/db`) |
 | Test users / secret details | Seeded (20 users, 40 details) |
 | Test lost reports / claims | Seeded (6 reports, 4 claims) |
-| Insert/update/delete (users: lost reports; staff: everything) | Items and lost reports done; claims not started |
+| Insert/update/delete (users: lost reports; staff: everything) | Done for items, lost reports and claims (API) |
 | Search by name / location / category | Done (`GET /api/items`) |
 | Item-history join (status, claim date, approving staff, found location) | Done (`GET /api/items/{id}/history`) |
 | Login (BCrypt) | Not started |
