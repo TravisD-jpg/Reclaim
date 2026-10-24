@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Anchor, Center, Grid, Group, Loader, Paper, SimpleGrid, Stack, Text, Title } from '@mantine/core'
+import { Anchor, Button, Center, Grid, Group, Loader, Modal, Paper, SimpleGrid, Stack, Text, Title } from '@mantine/core'
+import { useDisclosure } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
-import { IconArrowLeft } from '@tabler/icons-react'
-import { Link, useParams } from 'react-router'
+import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react'
+import { Link, useNavigate, useParams } from 'react-router'
 import { api } from '../api'
 import { useAccount } from '../account/accountContext'
 import { StatusBadge } from '../components/StatusBadge'
@@ -13,6 +14,9 @@ export function ItemDetailPage() {
   const { isStaff } = useAccount()
   const [history, setHistory] = useState(null)
   const [notFound, setNotFound] = useState(false)
+  const [confirmOpen, confirm] = useDisclosure(false)
+  const [deleting, setDeleting] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     api.get(`/items/${id}/history`)
@@ -23,6 +27,19 @@ export function ItemDetailPage() {
       })
   }, [id])
 
+  async function deleteItem() {
+    setDeleting(true)
+    try {
+      await api.delete(`/items/${id}`)
+      notifications.show({ color: 'teal', message: `${history.name} deleted.` })
+      navigate('/')
+    } catch (error) {
+      notifications.show({ color: 'red', title: 'Could not delete item', message: error.message })
+      setDeleting(false)
+      confirm.close()
+    }
+  }
+
   if (notFound) return <><BackLink /><Text mt="md">This item could not be found.</Text></>
   if (!history) return <Center p="xl"><Loader /></Center>
 
@@ -31,10 +48,26 @@ export function ItemDetailPage() {
   return (
     <>
       <BackLink />
-      <Group gap="sm" mt="md" mb="lg">
-        <Title order={2}>{history.name}</Title>
-        <StatusBadge status={history.status} />
+      <Group justify="space-between" mt="md" mb="lg">
+        <Group gap="sm">
+          <Title order={2}>{history.name}</Title>
+          <StatusBadge status={history.status} />
+        </Group>
+        {isStaff && (
+          <Group gap="sm">
+            <Button component={Link} to="edit" variant="default" leftSection={<IconPencil size={16} />}>Edit</Button>
+            <Button color="red" variant="light" leftSection={<IconTrash size={16} />} onClick={confirm.open}>Delete</Button>
+          </Group>
+        )}
       </Group>
+
+      <Modal opened={confirmOpen} onClose={confirm.close} title="Delete item?" centered>
+        <Text size="sm">{history.name} will be removed from the catalog. This can't be undone.</Text>
+        <Group justify="flex-end" mt="lg">
+          <Button variant="default" onClick={confirm.close}>Cancel</Button>
+          <Button color="red" loading={deleting} onClick={deleteItem}>Delete</Button>
+        </Group>
+      </Modal>
 
       <Grid>
         <Grid.Col span={{ base: 12, md: 7 }}>

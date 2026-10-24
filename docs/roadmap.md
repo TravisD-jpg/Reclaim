@@ -38,7 +38,7 @@ Goal: everything Stage 4 asks us to demo.
 - [x] Temporary "Acting as" account switch in the header (replaced by login in Phase 3)
 - [x] Catalog page with search and filters
 - [x] Item detail page with history
-- [ ] Add/edit item form (staff)
+- [x] Add/edit item form (staff), plus delete on the detail page
 - [ ] Lost report form
 
 ## Phase 2 — Stage 4 demo and report (due **Oct 26**)

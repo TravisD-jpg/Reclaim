@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Center, Grid, Group, Loader, Pagination, Paper, SegmentedControl, Select, Stack, Table, Text, TextInput } from '@mantine/core'
+import { Button, Center, Grid, Group, Loader, Pagination, Paper, SegmentedControl, Select, Stack, Table, Text, TextInput } from '@mantine/core'
 import { useDebouncedValue } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
-import { IconMoodEmpty, IconSearch } from '@tabler/icons-react'
-import { useNavigate } from 'react-router'
+import { IconMoodEmpty, IconPlus, IconSearch } from '@tabler/icons-react'
+import { Link, useNavigate } from 'react-router'
 import { api } from '../api'
+import { useAccount } from '../account/accountContext'
 import { StatusBadge } from '../components/StatusBadge'
 import { formatDate } from '../format'
 import { useLookups } from '../hooks/useLookups'
@@ -21,6 +22,7 @@ const statusOptions = [
 
 export function CatalogPage() {
   const navigate = useNavigate()
+  const { isStaff } = useAccount()
   const { categoryOptions, locationOptions } = useLookups()
   const [search, setSearch] = useState('')
   const [debouncedSearch] = useDebouncedValue(search, 300)
@@ -57,7 +59,9 @@ export function CatalogPage() {
 
   return (
     <>
-      <PageHeader title="Catalog" description="Every item turned in at a campus drop-off point." />
+      <PageHeader title="Catalog" description="Every item turned in at a campus drop-off point.">
+        {isStaff && <Button component={Link} to="/items/new" leftSection={<IconPlus size={16} />}>Log item</Button>}
+      </PageHeader>
 
       <Paper withBorder p="md" mb="md">
         <Grid align="flex-end">
