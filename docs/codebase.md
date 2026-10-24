@@ -59,13 +59,16 @@ Table names are unquoted, so Postgres stores them in lowercase (`items`, `lostre
 | `01_Categories.sql` | categories | 13 | Team-defined categories |
 | `02_Locations.sql` | locations | 104 buildings (`room_or_area` NULL) | UA campus map |
 | `03_Items.sql` | items | 400 | Cleaned rows from the Kaggle dataset, with stations mapped to UA buildings; all set to `status = 'stored'`. Dates span 2026-02-19 to 2026-03-21; 10 rows dated Feb 29 (invalid in 2026) were moved to Feb 28 |
+| `04_Users.sql` | users | 3 | One test account per role: `dev`, `staff`, `user`. Passwords are base64-encoded (see deviations) |
+| `05_ItemSecretDetails.sql` | itemsecretdetails | 40 | Hidden details on seeded items (e.g. "Broken zipper"), matched by item name, building and date found |
 
 How the seed scripts behave:
 - They can be re-run safely: categories use `ON CONFLICT DO NOTHING`, and locations use a `WHERE NOT EXISTS` check.
 - `03_Items.sql` looks up category and location ids by name. **It is not safe to re-run; it will insert duplicates.**
 
 ### Known issues
-- No users, lost reports, claims or secret details are seeded yet.
+- No lost reports or claims are seeded yet.
+- `Users.role` allows `user`, `staff` and `dev`.
 
 The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM), then loaded into Neon (`reclaimdb`, PostgreSQL 18.6) on 2026-10-21 in a single transaction. Every table, all 15 foreign keys, and all 400 items loaded. **The Neon database is already seeded; don't rerun `03_Items.sql` there.**
 
@@ -140,7 +143,8 @@ Everyone shares the `production` database, so writes are visible to the whole te
 | Schema (9 tables) | Done; loaded on Neon |
 | Real data: categories, locations, items | Loaded on Neon (13 / 104 / 400) |
 | API ↔ Neon connection | Done (`/health/db`) |
-| Test users / lost reports / claims / secret details | Not started |
+| Test users / secret details | Seeded (3 users, 40 details) |
+| Test lost reports / claims | Not started |
 | Insert/update/delete (users: lost reports; staff: everything) | Not started |
 | Search by name / location / category | Not started |
 | Item-history join (status, claim date, approving staff, found location) | Not started |
@@ -155,3 +159,5 @@ Report these in the next stage report.
 |---|---|---|
 | Items loaded by C# CsvHelper import tool (Stage 3 §3.1) | Items loaded from hand-written `03_Items.sql` | Finish the import tool, or explain the change in the Stage 4 report |
 | ~10,000 Kaggle records | 400 items seeded | Explain in Stage 4 if it stays this way |
+| `Users.role` is `user` or `staff` (Stage 3 schema) | Adds a third role, `dev` | A real deployment needs an admin role above staff to manage staff accounts and the system |
+| Passwords hashed with BCrypt.Net-Next (Stage 3 stack) | Seed passwords are base64-encoded, which is reversible | Acceptable for a demo with test accounts only; switch to BCrypt if time allows (roadmap Phase 7) |

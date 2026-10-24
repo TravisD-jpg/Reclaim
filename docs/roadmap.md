@@ -19,7 +19,8 @@ _Last updated: 2026-10-21_
 Goal: everything Stage 4 asks us to demo.
 
 **Data**
-- [ ] Seed test users: a few staff and ~15 regular users, with BCrypt-hashed passwords
+- [x] Seed test users: one per role (`dev`, `staff`, `user`), base64 passwords for now
+- [x] Seed secret details for 40 items (used later by Identity Verification)
 - [ ] Seed a handful of lost reports and claims so the history join returns real rows
 
 **API**
@@ -79,6 +80,7 @@ Needed before Identity Verification, because it depends on staff-only permission
 
 ## Phase 7 — Polish and final demo (due **Nov 30**)
 - [ ] Bug fixes, UI cleanup, readability pass on all code
+- [ ] _If time:_ replace base64 passwords with BCrypt hashes (seed and login)
 - [ ] Slides and a 10–15 minute demo script covering basic functions and both advanced functions
 - [ ] Rehearse against the time limit
 
