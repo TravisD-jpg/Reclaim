@@ -43,6 +43,38 @@ public class ItemsController(NpgsqlDataSource dataSource) : ControllerBase
         return item == null ? NotFound() : item;
     }
 
+    // The Stage 2 multi-table join: item, category, location, the staff who logged it,
+    // its claim, the claimant, the approving staff, and the lost report behind the claim.
+    [HttpGet("{id:int}/history")]
+    public async Task<ActionResult<ItemHistory>> GetHistory(int id)
+    {
+        await using var connection = await dataSource.OpenConnectionAsync();
+        var history = await connection.QuerySingleOrDefaultAsync<ItemHistory>(
+            """
+            SELECT i.item_id, i.name, i.description, i.status, i.date_found,
+                   c.name AS category_name,
+                   l.building, l.room_or_area,
+                   logger.name AS logged_by_name,
+                   cl.claim_id, cl.claim_date,
+                   claimant.name AS claimant_name, claimant.email AS claimant_email,
+                   approver.name AS approved_by_name,
+                   lr.report_id, lr.name AS report_name, lr.date_lost,
+                   (SELECT count(*) FROM verificationattempts va
+                    WHERE va.item_id = i.item_id AND NOT va.passed) AS failed_attempts
+            FROM items i
+            LEFT JOIN categories c ON c.category_id = i.category_id
+            LEFT JOIN locations l ON l.location_id = i.found_location_id
+            LEFT JOIN users logger ON logger.user_id = i.logged_by
+            LEFT JOIN claims cl ON cl.item_id = i.item_id
+            LEFT JOIN users claimant ON claimant.user_id = cl.user_id
+            LEFT JOIN users approver ON approver.user_id = cl.approved_by
+            LEFT JOIN lostreports lr ON lr.report_id = cl.report_id
+            WHERE i.item_id = @Id
+            """,
+            new { Id = id });
+        return history == null ? NotFound() : history;
+    }
+
     [HttpPost]
     public async Task<ActionResult<Item>> Create(ItemRequest request)
     {

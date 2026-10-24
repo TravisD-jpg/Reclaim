@@ -28,7 +28,7 @@ Goal: everything Stage 4 asks us to demo.
 - [x] `GET /api/categories`, `GET /api/locations` (for form dropdowns)
 - [x] Items CRUD: `GET /api/items`, `GET /api/items/{id}`, `POST`, `PUT`, `DELETE`
 - [x] Item search: name/description (partial match), location, category, and status filters on `GET /api/items`
-- [ ] Item history join: `GET /items/{id}/history`, joining item, category, found location, logged-by staff, claim, claimant, and approving staff
+- [x] Item history join: `GET /api/items/{id}/history`, joining item, category, found location, logged-by staff, claim, claimant, and approving staff
 - [ ] Lost reports CRUD
 - [ ] Claims CRUD (staff)
 

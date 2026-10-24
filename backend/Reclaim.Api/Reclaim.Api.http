@@ -22,6 +22,11 @@ GET {{Reclaim.Api_HostAddress}}/api/items/1
 
 ###
 
+# Multi-table join: 299 is claimed through a lost report, 1 is a walk-in claim, 2 is unclaimed
+GET {{Reclaim.Api_HostAddress}}/api/items/299/history
+
+###
+
 POST {{Reclaim.Api_HostAddress}}/api/items
 Content-Type: application/json
 

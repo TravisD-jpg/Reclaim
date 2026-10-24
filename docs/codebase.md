@@ -105,6 +105,7 @@ The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM)
 | GET | `/api/locations` | any | All locations, sorted by building (for dropdowns) | locations |
 | GET | `/api/items` | any | Search items. Optional `search` (partial match on name or description), `categoryId`, `locationId`, `status`. Newest first | items, categories, locations |
 | GET | `/api/items/{id}` | any | One item with its category and building names; 404 if missing | items, categories, locations |
+| GET | `/api/items/{id}/history` | staff* | **The multi-table join.** Item details, category, location, the staff who logged it, its claim (date, claimant, approving staff), the lost report behind the claim, and the failed verification count. All `LEFT JOIN`s, so unclaimed items still return; 404 if missing | items, categories, locations, users (×3), claims, lostreports, verificationattempts |
 | POST | `/api/items` | staff* | Create an item; returns 201 with the new item. 400 on validation errors or a nonexistent category/location | items |
 | PUT | `/api/items/{id}` | staff* | Replace an item's fields; 404 if missing | items |
 | DELETE | `/api/items/{id}` | staff* | Delete an item (its secret details cascade); 204, 404 if missing, 409 if it has claims or verification attempts | items |
@@ -163,9 +164,9 @@ Everyone shares the `production` database, so writes are visible to the whole te
 | API ↔ Neon connection | Done (`/health/db`) |
 | Test users / secret details | Seeded (20 users, 40 details) |
 | Test lost reports / claims | Seeded (6 reports, 4 claims) |
-| Insert/update/delete (users: lost reports; staff: everything) | Not started |
-| Search by name / location / category | Not started |
-| Item-history join (status, claim date, approving staff, found location) | Not started |
+| Insert/update/delete (users: lost reports; staff: everything) | Items done; lost reports and claims not started |
+| Search by name / location / category | Done (`GET /api/items`) |
+| Item-history join (status, claim date, approving staff, found location) | Done (`GET /api/items/{id}/history`) |
 | Login (BCrypt) | Not started |
 | Smart Search (FuzzySharp scoring → MatchCandidates) | Not started (due Nov 13) |
 | Identity Verification (ItemSecretDetails, VerificationAttempts) | Not started (due Nov 27) |
