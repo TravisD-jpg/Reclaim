@@ -4,7 +4,7 @@ The ordered plan from now to final submission. Each checkbox is roughly one bloc
 
 Requirements come from [project-spec.md](project-spec.md).
 
-_Last updated: 2026-10-21_
+_Last updated: 2026-10-24_
 
 ---
 
@@ -37,11 +37,12 @@ Goal: everything Stage 4 asks us to demo.
 - [x] Mantine setup with UA theme, routing, app layout, and an API client
 - [x] Temporary "Acting as" account switch in the header (replaced by login in Phase 3)
 - [x] Catalog page with search and filters
-- [ ] Item detail page with history
+- [x] Item detail page with history
 - [ ] Add/edit item form (staff)
 - [ ] Lost report form
 
 ## Phase 2 — Stage 4 demo and report (due **Oct 26**)
+- [ ] Make the seed items realistic: many share the same generic name and description (e.g. "Jewelry" / "Metal jewelry."), so give each a distinct name and description before the demo
 - [ ] Demo script, 5–8 minutes:
   - show real data;
   - insert, update and delete an item;

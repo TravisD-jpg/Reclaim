@@ -3,6 +3,7 @@ import { Center, Grid, Group, Loader, Pagination, Paper, SegmentedControl, Selec
 import { useDebouncedValue } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
 import { IconMoodEmpty, IconSearch } from '@tabler/icons-react'
+import { useNavigate } from 'react-router'
 import { api } from '../api'
 import { StatusBadge } from '../components/StatusBadge'
 import { formatDate } from '../format'
@@ -19,6 +20,7 @@ const statusOptions = [
 ]
 
 export function CatalogPage() {
+  const navigate = useNavigate()
   const { categoryOptions, locationOptions } = useLookups()
   const [search, setSearch] = useState('')
   const [debouncedSearch] = useDebouncedValue(search, 300)
@@ -106,7 +108,7 @@ export function CatalogPage() {
                 </Table.Thead>
                 <Table.Tbody>
                   {pageItems.map((item) => (
-                    <Table.Tr key={item.itemId}>
+                    <Table.Tr key={item.itemId} onClick={() => navigate(`/items/${item.itemId}`)} style={{ cursor: 'pointer' }}>
                       <Table.Td>
                         <Text fw={500} size="sm">{item.name}</Text>
                         {item.description && <Text c="dimmed" size="xs" lineClamp={1}>{item.description}</Text>}

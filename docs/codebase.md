@@ -168,7 +168,8 @@ React 19 + Vite 8, with **Mantine 9** (components), **React Router 8** (pages), 
 ### Pages
 | Route | Page | Who | Status |
 |---|---|---|---|
-| `/` | `CatalogPage` | everyone | Done. Search box (debounced 300 ms), category, building and status filters, all sent to `GET /api/items`. Shows `stored` items by default; table of 25 per page |
+| `/` | `CatalogPage` | everyone | Done. Search box (debounced 300 ms), category, building and status filters, all sent to `GET /api/items`. Shows `stored` items by default; table of 25 per page. Clicking a row opens its detail page |
+| `/items/:id` | `ItemDetailPage` | everyone | Done. Shows `GET /api/items/{id}/history`: item details (category, building and room, date found, logged by) and its claim (date, claimant, approving staff, linked lost report). Claimant email and failed verification count show only for staff |
 | `/lost-reports` | `LostReportsPage` | everyone | Placeholder |
 | `/claims` | `ClaimsPage` | staff/dev (nav link hidden otherwise) | Placeholder |
 
@@ -207,7 +208,7 @@ Everyone shares the `production` database, so writes are visible to the whole te
 | Test lost reports / claims | Seeded (6 reports, 4 claims) |
 | Insert/update/delete (users: lost reports; staff: everything) | Done for items, lost reports and claims (API) |
 | Search by name / location / category | Done (`GET /api/items`) |
-| Item-history join (status, claim date, approving staff, found location) | Done (`GET /api/items/{id}/history`) |
+| Item-history join (status, claim date, approving staff, found location) | Done (`GET /api/items/{id}/history`, shown on the item detail page) |
 | Login (BCrypt) | Not started |
 | Smart Search (FuzzySharp scoring → MatchCandidates) | Not started (due Nov 13) |
 | Identity Verification (ItemSecretDetails, VerificationAttempts) | Not started (due Nov 27) |
