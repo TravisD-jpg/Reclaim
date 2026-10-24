@@ -29,7 +29,8 @@ Goal: everything Stage 4 asks us to demo.
 - [x] Items CRUD: `GET /api/items`, `GET /api/items/{id}`, `POST`, `PUT`, `DELETE`
 - [x] Item search: name/description (partial match), location, category, and status filters on `GET /api/items`
 - [x] Item history join: `GET /api/items/{id}/history`, joining item, category, found location, logged-by staff, claim, claimant, and approving staff
-- [ ] Lost reports CRUD
+- [x] Lost reports CRUD (`/api/lost-reports`)
+- [x] `GET /api/users` for the account switch
 - [ ] Claims CRUD (staff)
 
 **Frontend**
@@ -65,7 +66,7 @@ Needed before Identity Verification, because it depends on staff-only permission
   - location match;
   - how close the lost date is to the found date
 - [ ] Save top matches to `MatchCandidates` when a report is filed
-- [ ] `GET /lostreports/{id}/matches` and a matches view in the UI
+- [ ] `GET /api/lost-reports/{id}/matches` and a matches view in the UI
 - [ ] Measure accuracy against the test set (for the Stage 5 report and the demo)
 - [ ] Unit tests for the scoring algorithm (xUnit project): known matches score high, wrong items score low, and each factor is checked separately
 

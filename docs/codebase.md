@@ -110,6 +110,13 @@ The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM)
 | PUT | `/api/items/{id}` | staff* | Replace an item's fields; 404 if missing | items |
 | DELETE | `/api/items/{id}` | staff* | Delete an item (its secret details cascade); 204, 404 if missing, 409 if it has claims or verification attempts | items |
 
+| GET | `/api/users` | any | All accounts (id, name, email, role), devs then staff then students. Never returns `password_hash`. Feeds the demo's account switch | users |
+| GET | `/api/lost-reports` | any | Search lost reports. Optional `search` (name or description), `userId`, `status`. Newest first | lostreports, users, categories, locations |
+| GET | `/api/lost-reports/{id}` | any | One report with reporter, category and building names; 404 if missing | lostreports, users, categories, locations |
+| POST | `/api/lost-reports` | any | File a report; `userId` required, status defaults to `open`. 201, or 400 on validation errors or a nonexistent user/category/location | lostreports |
+| PUT | `/api/lost-reports/{id}` | owner/staff* | Replace a report's fields; 404 if missing | lostreports |
+| DELETE | `/api/lost-reports/{id}` | owner/staff* | Delete a report; 204, 404 if missing, 409 if a claim or match links to it (close it instead) | lostreports |
+
 \* Roles aren't enforced yet; the frontend's user/staff switch hides staff actions until login lands (roadmap Phase 3). `logged_by` is left NULL until then.
 
 `Reclaim.Api.http` has a ready-to-send request for every endpoint.
@@ -164,7 +171,7 @@ Everyone shares the `production` database, so writes are visible to the whole te
 | API ↔ Neon connection | Done (`/health/db`) |
 | Test users / secret details | Seeded (20 users, 40 details) |
 | Test lost reports / claims | Seeded (6 reports, 4 claims) |
-| Insert/update/delete (users: lost reports; staff: everything) | Items done; lost reports and claims not started |
+| Insert/update/delete (users: lost reports; staff: everything) | Items and lost reports done; claims not started |
 | Search by name / location / category | Done (`GET /api/items`) |
 | Item-history join (status, claim date, approving staff, found location) | Done (`GET /api/items/{id}/history`) |
 | Login (BCrypt) | Not started |
