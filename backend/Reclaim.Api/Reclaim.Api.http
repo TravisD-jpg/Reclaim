@@ -4,3 +4,52 @@ GET {{Reclaim.Api_HostAddress}}/health/db
 Accept: application/json
 
 ###
+
+GET {{Reclaim.Api_HostAddress}}/api/categories
+
+###
+
+GET {{Reclaim.Api_HostAddress}}/api/locations
+
+###
+
+# Search: any mix of search, categoryId, locationId, status
+GET {{Reclaim.Api_HostAddress}}/api/items?search=earbuds&categoryId=2
+
+###
+
+GET {{Reclaim.Api_HostAddress}}/api/items/1
+
+###
+
+POST {{Reclaim.Api_HostAddress}}/api/items
+Content-Type: application/json
+
+{
+  "name": "Blue Umbrella",
+  "description": "Compact umbrella with a wooden handle",
+  "categoryId": 13,
+  "foundLocationId": 23,
+  "dateFound": "2026-10-24"
+}
+
+###
+
+# Replace 401 with the itemId returned by the POST above
+PUT {{Reclaim.Api_HostAddress}}/api/items/401
+Content-Type: application/json
+
+{
+  "name": "Blue Umbrella",
+  "description": "Compact umbrella with a wooden handle",
+  "categoryId": 13,
+  "foundLocationId": 23,
+  "dateFound": "2026-10-24",
+  "status": "disposed"
+}
+
+###
+
+DELETE {{Reclaim.Api_HostAddress}}/api/items/401
+
+###

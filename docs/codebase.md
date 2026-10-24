@@ -101,6 +101,15 @@ The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM)
 | GET | `/health/db` | any | Returns the Postgres version and item count to prove the API can reach Neon | items |
 | GET | `/api/categories` | any | All categories, sorted by name (for dropdowns) | categories |
 | GET | `/api/locations` | any | All locations, sorted by building (for dropdowns) | locations |
+| GET | `/api/items` | any | Search items. Optional `search` (partial match on name or description), `categoryId`, `locationId`, `status`. Newest first | items, categories, locations |
+| GET | `/api/items/{id}` | any | One item with its category and building names; 404 if missing | items, categories, locations |
+| POST | `/api/items` | staff* | Create an item; returns 201 with the new item. 400 on validation errors or a nonexistent category/location | items |
+| PUT | `/api/items/{id}` | staff* | Replace an item's fields; 404 if missing | items |
+| DELETE | `/api/items/{id}` | staff* | Delete an item (its secret details cascade); 204, 404 if missing, 409 if it has claims or verification attempts | items |
+
+\* Roles aren't enforced yet; the frontend's user/staff switch hides staff actions until login lands (roadmap Phase 3). `logged_by` is left NULL until then.
+
+`Reclaim.Api.http` has a ready-to-send request for every endpoint.
 
 ---
 

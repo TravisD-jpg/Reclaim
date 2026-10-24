@@ -24,10 +24,10 @@ Goal: everything Stage 4 asks us to demo.
 - [ ] Seed a handful of lost reports and claims so the history join returns real rows
 
 **API**
-- [ ] CORS for the Vite dev server
+- [ ] Vite dev-server proxy for `/api` (replaces CORS; done with the frontend)
 - [x] `GET /api/categories`, `GET /api/locations` (for form dropdowns)
-- [ ] Items CRUD: `GET /items`, `GET /items/{id}`, `POST`, `PUT`, `DELETE`
-- [ ] Item search: name (partial match), location, category, and status filters on `GET /items`
+- [x] Items CRUD: `GET /api/items`, `GET /api/items/{id}`, `POST`, `PUT`, `DELETE`
+- [x] Item search: name/description (partial match), location, category, and status filters on `GET /api/items`
 - [ ] Item history join: `GET /items/{id}/history`, joining item, category, found location, logged-by staff, claim, claimant, and approving staff
 - [ ] Lost reports CRUD
 - [ ] Claims CRUD (staff)
@@ -67,6 +67,7 @@ Needed before Identity Verification, because it depends on staff-only permission
 - [ ] Save top matches to `MatchCandidates` when a report is filed
 - [ ] `GET /lostreports/{id}/matches` and a matches view in the UI
 - [ ] Measure accuracy against the test set (for the Stage 5 report and the demo)
+- [ ] Unit tests for the scoring algorithm (xUnit project): known matches score high, wrong items score low, and each factor is checked separately
 
 ## Phase 5 — Stage 5 progress report (due **Nov 25**)
 - [ ] Current status, real data summary, and how Smart Search is implemented
@@ -78,6 +79,7 @@ Needed before Identity Verification, because it depends on staff-only permission
 - [ ] Log every attempt in `VerificationAttempts`, and lock out after repeated failures
 - [ ] Staff view of failed attempts per item and per user
 - [ ] On pass: staff approves, `Claims` row created, item status set to `claimed`
+- [ ] Unit tests for the verification rules: answer checking, lockout after repeated failures, and secret details never returned to regular users
 
 ## Phase 7 — Polish and final demo (due **Nov 30**)
 - [ ] Bug fixes, UI cleanup, readability pass on all code
