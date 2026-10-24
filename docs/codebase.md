@@ -16,6 +16,7 @@ Reclaim/
 ├── database/
 │   ├── tables/                 one CREATE TABLE script per table
 │   ├── seed/                   numbered INSERT scripts (run in order)
+│   ├── migrations/             one-time fixes for databases loaded from older seeds
 │   └── data/                   raw source data (gitignored)
 ├── frontend/                   React 19 + Vite 8 single-page app
 ├── tools/Reclaim.DataImport/   console app for importing the Kaggle CSV
@@ -60,7 +61,7 @@ Table names are unquoted, so Postgres stores them in lowercase (`items`, `lostre
 |---|---|---|---|
 | `01_Categories.sql` | categories | 13 | Team-defined categories |
 | `02_Locations.sql` | locations | 104 buildings (`room_or_area` NULL) | UA campus map |
-| `03_Items.sql` | items | 400 | Cleaned rows from the Kaggle dataset, with stations mapped to UA buildings; all set to `status = 'stored'`. Dates span 2026-02-19 to 2026-03-21; 10 rows dated Feb 29 (invalid in 2026) were moved to Feb 28 |
+| `03_Items.sql` | items | 400 | Cleaned rows from the Kaggle dataset, with stations mapped to UA buildings; all set to `status = 'stored'`. Dates span 2026-02-19 to 2026-03-21; 10 rows dated Feb 29 (invalid in 2026) were moved to Feb 28. The Kaggle names were generic (114 rows were just "Bag"), so on 2026-10-24 every row got a distinct, realistic name and description (e.g. "Navy JanSport backpack"). Category, building, date and any Kaggle color were kept. New text never gives away the row's secret detail |
 | `04_Users.sql` | users | 20 | Team-entered accounts: 2 `dev` (Travis, Davonte), 3 `staff` (one per lost-and-found desk), 15 `user` students. UANet-style emails and 7-digit UA IDs. Every demo password is `reclaim`, base64-encoded (see deviations) |
 | `05_ItemSecretDetails.sql` | itemsecretdetails | 40 | Hidden details on seeded items (e.g. "Broken zipper"), matched by item name, building and date found |
 | `06_LostReports.sql` | lostreports | 6 | Filed by 6 different students: 3 `closed` (item returned), 3 `open`. "Navy blue jacket" describes a real stored item, a known answer for Smart Search |
@@ -70,6 +71,14 @@ How the seed scripts behave:
 - Seeds look up related rows by natural keys (category name, building, user email, item name + building + date found), never by hard-coded IDs.
 - **Safe to rerun:** `01`, `02`, `04`, `06`, `07` (they skip rows that already exist).
 - **Not safe to rerun:** `03` and `05` insert duplicates.
+- Item names are unique, so the name + building + date lookups in `05` and `07` always hit exactly one item.
+
+### Migrations (`database/migrations/`)
+One-time scripts for databases loaded from an older seed. Not needed on a fresh load.
+
+| File | What it does |
+|---|---|
+| `2026-10-24_distinct_item_names.sql` | Updates the 400 seeded items to the new names and descriptions, matching by `item_id` and the old name, so items created, edited or deleted through the app are skipped. Runs in one transaction. **Run on Neon 2026-10-24:** 399 rows updated; item 13 had been deleted during testing |
 
 ### Known issues
 - `Users.role` allows `user`, `staff` and `dev`.
@@ -222,5 +231,6 @@ Report these in the next stage report.
 |---|---|---|
 | Items loaded by C# CsvHelper import tool (Stage 3 §3.1) | Items loaded from hand-written `03_Items.sql` | Finish the import tool, or explain the change in the Stage 4 report |
 | ~10,000 Kaggle records | 400 items seeded | Explain in Stage 4 if it stays this way |
+| Item data comes from the Kaggle dataset (Stage 3 §3) | Category, location and date come from Kaggle, but names and descriptions were rewritten (AI-assisted) because the originals were too generic to tell items apart | Generic names made the catalog unusable and would break Smart Search's text matching. Explain in the Stage 4 report |
 | `Users.role` is `user` or `staff` (Stage 3 schema) | Adds a third role, `dev` | A real deployment needs an admin role above staff to manage staff accounts and the system |
 | Passwords hashed with BCrypt.Net-Next (Stage 3 stack) | Seed passwords are base64-encoded, which is reversible | Acceptable for a demo with test accounts only; switch to BCrypt if time allows (roadmap Phase 7) |

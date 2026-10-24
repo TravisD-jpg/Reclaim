@@ -1,9 +1,9 @@
 WITH seed_claims (item_name, building, date_found, claimant_email, report_name, approver_email, claim_date) AS (
     VALUES
-    ('Gray Earbuds', 'Dave''s Market', '2026-02-26', 'aj118@uakron.edu', 'Gray earbuds', 'ml57@uakron.edu', '2026-02-27 14:30'),
-    ('Black Wallet or purse', 'Buchtel Field', '2026-03-03', 'ab391@uakron.edu', 'Black wallet', 'dp88@uakron.edu', '2026-03-04 10:15'),
-    ('Keys', 'Honors Complex', '2026-03-04', 'pp162@uakron.edu', 'Keys on red lanyard', 'ko23@uakron.edu', '2026-03-05 16:45'),
-    ('Jewelry', 'Hower House', '2026-03-21', 'jk214@uakron.edu', NULL, 'ml57@uakron.edu', '2026-03-23 11:00') -- Walk-in claim, no lost report
+    ('Gray Galaxy Buds2', 'Dave''s Market', '2026-02-26', 'aj118@uakron.edu', 'Gray earbuds', 'ml57@uakron.edu', '2026-02-27 14:30'),
+    ('Black leather wallet', 'Buchtel Field', '2026-03-03', 'ab391@uakron.edu', 'Black wallet', 'dp88@uakron.edu', '2026-03-04 10:15'),
+    ('Dorm and car keys', 'Honors Complex', '2026-03-04', 'pp162@uakron.edu', 'Keys on red lanyard', 'ko23@uakron.edu', '2026-03-05 16:45'),
+    ('Silver chain necklace', 'Hower House', '2026-03-21', 'jk214@uakron.edu', NULL, 'ml57@uakron.edu', '2026-03-23 11:00') -- Walk-in claim, no lost report
 ),
 new_claims AS (
     INSERT INTO claims (item_id, user_id, report_id, approved_by, claim_date)
