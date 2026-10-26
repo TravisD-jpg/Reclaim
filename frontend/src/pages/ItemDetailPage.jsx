@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Anchor, Button, Center, Grid, Group, Loader, Modal, Paper, SimpleGrid, Stack, Text, Title } from '@mantine/core'
+import { Alert, Anchor, Button, Center, Grid, Group, Loader, Modal, Paper, SimpleGrid, Stack, Text, Title } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
-import { IconArrowLeft, IconPencil, IconTrash } from '@tabler/icons-react'
+import { IconArrowLeft, IconMapPin, IconPencil, IconTrash } from '@tabler/icons-react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { api } from '../api'
 import { useAccount } from '../account/accountContext'
@@ -44,6 +44,7 @@ export function ItemDetailPage() {
   if (!history) return <Center p="xl"><Loader /></Center>
 
   const foundAt = history.roomOrArea ? `${history.building} – ${history.roomOrArea}` : history.building
+  const heldAt = history.heldAtRoom ? `${history.heldAtBuilding} – ${history.heldAtRoom}` : history.heldAtBuilding
 
   return (
     <>
@@ -69,6 +70,12 @@ export function ItemDetailPage() {
         </Group>
       </Modal>
 
+      {history.status === 'stored' && (
+        <Alert icon={<IconMapPin size={18} />} title={`Pick up at ${heldAt}`} mb="md">
+          Think this is yours? Bring your UA ID. Staff will ask you a few questions to confirm it's yours before handing it over.
+        </Alert>
+      )}
+
       <Grid>
         <Grid.Col span={{ base: 12, md: 7 }}>
           <Section title="Item">
@@ -76,6 +83,7 @@ export function ItemDetailPage() {
             <SimpleGrid cols={{ base: 1, xs: 2 }}>
               <Field label="Category" value={history.categoryName} />
               <Field label="Found at" value={foundAt} />
+              <Field label="Held at" value={heldAt} />
               <Field label="Date found" value={formatDate(history.dateFound)} />
               <Field label="Logged by" value={history.loggedByName} />
             </SimpleGrid>

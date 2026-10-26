@@ -110,3 +110,16 @@ WHERE NOT EXISTS ( -- Incase we need to rerun, redundancy
     SELECT 1 FROM locations AS l
     WHERE l.building = src.building AND l.room_or_area IS NULL
 );
+
+-- The three lost-and-found desks where items are held for pickup.
+INSERT INTO locations (building, room_or_area, is_dropoff_point)
+SELECT src.building, src.room_or_area, TRUE
+FROM (VALUES
+    ('Student Union, The Jean Hower Taber', 'Information Desk'),
+    ('Bierce Library', 'Circulation Desk'),
+    ('UA Police Department', 'Front Desk')
+) AS src(building, room_or_area)
+WHERE NOT EXISTS (
+    SELECT 1 FROM locations AS l
+    WHERE l.building = src.building AND l.room_or_area = src.room_or_area
+);

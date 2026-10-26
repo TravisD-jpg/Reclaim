@@ -9,15 +9,17 @@ namespace Reclaim.Api.Controllers;
 [Route("api/items")]
 public class ItemsController(NpgsqlDataSource dataSource) : ControllerBase
 {
-    // Shared by every read so items always come back with their category and building names.
+    // Shared by every read so items always come back with their category, building and pickup desk.
     private const string SelectItems = """
         SELECT i.item_id, i.name, i.description,
                i.category_id, c.name AS category_name,
                i.found_location_id, l.building,
+               i.held_at_location_id, h.building AS held_at_building, h.room_or_area AS held_at_room,
                i.date_found, i.status, i.photo_url
         FROM items i
         LEFT JOIN categories c ON c.category_id = i.category_id
         LEFT JOIN locations l ON l.location_id = i.found_location_id
+        JOIN locations h ON h.location_id = i.held_at_location_id
         """;
 
     [HttpGet]
@@ -54,6 +56,7 @@ public class ItemsController(NpgsqlDataSource dataSource) : ControllerBase
             SELECT i.item_id, i.name, i.description, i.status, i.date_found,
                    c.name AS category_name,
                    l.building, l.room_or_area,
+                   h.building AS held_at_building, h.room_or_area AS held_at_room,
                    logger.name AS logged_by_name,
                    cl.claim_id, cl.claim_date,
                    claimant.name AS claimant_name, claimant.email AS claimant_email,
@@ -64,6 +67,7 @@ public class ItemsController(NpgsqlDataSource dataSource) : ControllerBase
             FROM items i
             LEFT JOIN categories c ON c.category_id = i.category_id
             LEFT JOIN locations l ON l.location_id = i.found_location_id
+            JOIN locations h ON h.location_id = i.held_at_location_id
             LEFT JOIN users logger ON logger.user_id = i.logged_by
             LEFT JOIN claims cl ON cl.item_id = i.item_id
             LEFT JOIN users claimant ON claimant.user_id = cl.user_id
@@ -79,12 +83,14 @@ public class ItemsController(NpgsqlDataSource dataSource) : ControllerBase
     public async Task<ActionResult<Item>> Create(ItemRequest request)
     {
         await using var connection = await dataSource.OpenConnectionAsync();
+        if (!await IsDropoffPoint(connection, request.HeldAtLocationId))
+            return BadRequest("Items must be held at a drop-off point.");
         try
         {
             var id = await connection.ExecuteScalarAsync<int>(
                 """
-                INSERT INTO items (name, description, category_id, found_location_id, date_found, status, photo_url)
-                VALUES (@Name, @Description, @CategoryId, @FoundLocationId, @DateFound, @Status, @PhotoUrl)
+                INSERT INTO items (name, description, category_id, found_location_id, held_at_location_id, date_found, status, photo_url)
+                VALUES (@Name, @Description, @CategoryId, @FoundLocationId, @HeldAtLocationId, @DateFound, @Status, @PhotoUrl)
                 RETURNING item_id
                 """,
                 request);
@@ -100,18 +106,20 @@ public class ItemsController(NpgsqlDataSource dataSource) : ControllerBase
     public async Task<ActionResult<Item>> Update(int id, ItemRequest request)
     {
         await using var connection = await dataSource.OpenConnectionAsync();
+        if (!await IsDropoffPoint(connection, request.HeldAtLocationId))
+            return BadRequest("Items must be held at a drop-off point.");
         try
         {
             var updated = await connection.ExecuteAsync(
                 """
                 UPDATE items
                 SET name = @Name, description = @Description, category_id = @CategoryId,
-                    found_location_id = @FoundLocationId, date_found = @DateFound,
+                    found_location_id = @FoundLocationId, held_at_location_id = @HeldAtLocationId, date_found = @DateFound,
                     status = @Status, photo_url = @PhotoUrl
                 WHERE item_id = @Id
                 """,
                 new { Id = id, request.Name, request.Description, request.CategoryId,
-                      request.FoundLocationId, request.DateFound, request.Status, request.PhotoUrl });
+                      request.FoundLocationId, request.HeldAtLocationId, request.DateFound, request.Status, request.PhotoUrl });
             return updated == 0 ? NotFound() : (await FindItem(connection, id))!;
         }
         catch (PostgresException e) when (e.SqlState == PostgresErrorCodes.ForeignKeyViolation)
@@ -134,6 +142,11 @@ public class ItemsController(NpgsqlDataSource dataSource) : ControllerBase
             return Conflict("This item has claims or verification attempts and can't be deleted.");
         }
     }
+
+    private static Task<bool> IsDropoffPoint(NpgsqlConnection connection, int? locationId) =>
+        connection.ExecuteScalarAsync<bool>(
+            "SELECT EXISTS (SELECT 1 FROM locations WHERE location_id = @Id AND is_dropoff_point)",
+            new { Id = locationId });
 
     private static Task<Item?> FindItem(NpgsqlConnection connection, int id) =>
         connection.QuerySingleOrDefaultAsync<Item>(SelectItems + " WHERE i.item_id = @Id", new { Id = id });

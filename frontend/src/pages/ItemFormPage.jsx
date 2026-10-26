@@ -13,7 +13,7 @@ const statusOptions = [
   { value: 'disposed', label: 'Disposed' },
 ]
 
-const emptyItem = { name: '', description: '', categoryId: null, foundLocationId: null, dateFound: '', status: 'stored', photoUrl: '' }
+const emptyItem = { name: '', description: '', categoryId: null, foundLocationId: null, heldAtLocationId: null, dateFound: '', status: 'stored', photoUrl: '' }
 
 // API item -> form values. Selects need string ids and inputs need '' instead of null.
 function toFormValues(item) {
@@ -22,6 +22,7 @@ function toFormValues(item) {
     description: item.description ?? '',
     categoryId: item.categoryId === null ? null : String(item.categoryId),
     foundLocationId: item.foundLocationId === null ? null : String(item.foundLocationId),
+    heldAtLocationId: String(item.heldAtLocationId),
     dateFound: item.dateFound,
     status: item.status,
     photoUrl: item.photoUrl ?? '',
@@ -47,13 +48,14 @@ export function ItemFormPage() {
 function ItemForm({ itemId, initialValues }) {
   const isEdit = itemId !== undefined
   const navigate = useNavigate()
-  const { categoryOptions, locationOptions } = useLookups()
+  const { categoryOptions, locationOptions, dropoffOptions } = useLookups()
   const [saving, setSaving] = useState(false)
 
   const form = useForm({
     initialValues,
     validate: {
       name: (value) => (value.trim() ? null : 'Name is required'),
+      heldAtLocationId: (value) => (value ? null : 'Pickup desk is required'),
       dateFound: (value) => (value ? null : 'Date found is required'),
     },
   })
@@ -65,6 +67,7 @@ function ItemForm({ itemId, initialValues }) {
       description: values.description.trim() || null,
       categoryId: values.categoryId && Number(values.categoryId),
       foundLocationId: values.foundLocationId && Number(values.foundLocationId),
+      heldAtLocationId: Number(values.heldAtLocationId),
       photoUrl: values.photoUrl.trim() || null,
     }
     setSaving(true)
@@ -104,6 +107,10 @@ function ItemForm({ itemId, initialValues }) {
           <Grid.Col span={{ base: 12, sm: 6 }}>
             <Select label="Found at" placeholder="Pick a building" data={locationOptions} clearable searchable
               {...form.getInputProps('foundLocationId')} />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            <Select label="Held at" placeholder="Pick a drop-off desk" data={dropoffOptions} withAsterisk
+              {...form.getInputProps('heldAtLocationId')} />
           </Grid.Col>
           <Grid.Col span={{ base: 12, sm: 6 }}>
             <TextInput type="date" label="Date found" withAsterisk {...form.getInputProps('dateFound')} />

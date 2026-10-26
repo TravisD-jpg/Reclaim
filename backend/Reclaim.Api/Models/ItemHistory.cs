@@ -1,6 +1,6 @@
 namespace Reclaim.Api.Models;
 
-// One row per item: where and when it was found, who logged it, and its claim if it has one.
+// One row per item: where and when it was found, where to pick it up, who logged it, and its claim if it has one.
 public record ItemHistory(
     int ItemId,
     string Name,
@@ -10,6 +10,8 @@ public record ItemHistory(
     string? CategoryName,
     string? Building,
     string? RoomOrArea,
+    string HeldAtBuilding,
+    string? HeldAtRoom,
     string? LoggedByName,
     int? ClaimId,
     DateTime? ClaimDate,

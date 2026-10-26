@@ -406,17 +406,30 @@ building_locations AS (
     FROM Locations
     WHERE room_or_area IS NULL
     GROUP BY building
+),
+dropoff_points AS (
+    SELECT building, location_id
+    FROM Locations
+    WHERE is_dropoff_point
 )
 INSERT INTO Items (
-    name, description, category_id, found_location_id, date_found, status
+    name, description, category_id, found_location_id, held_at_location_id, date_found, status
 )
 SELECT
     i.name,
     i.description,
     c.category_id,
     l.location_id,
+    d.location_id,
     CAST(i.date_found AS DATE),
     'stored'
 FROM seed_items AS i
 JOIN Categories AS c ON c.name = i.category
-JOIN building_locations AS l ON l.building = i.building;
+JOIN building_locations AS l ON l.building = i.building
+-- Valuables go to UAPD, bags to the Union (it has the most room), everything else to Bierce.
+JOIN dropoff_points AS d ON d.building = CASE
+    WHEN i.category IN ('Wallets & Purses', 'Electronics', 'Keys & Cards', 'Jewelry & Accessories', 'Documents', 'Cash')
+        THEN 'UA Police Department'
+    WHEN i.category = 'Bags & Luggage' THEN 'Student Union, The Jean Hower Taber'
+    ELSE 'Bierce Library'
+END;

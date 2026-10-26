@@ -10,6 +10,9 @@ public record Item(
     string? CategoryName,
     int? FoundLocationId,
     string? Building,
+    int HeldAtLocationId,
+    string HeldAtBuilding,
+    string? HeldAtRoom,
     DateOnly DateFound,
     string? Status,
     string? PhotoUrl);
@@ -26,6 +29,9 @@ public class ItemRequest
     public int? CategoryId { get; init; }
 
     public int? FoundLocationId { get; init; }
+
+    [Required]
+    public int? HeldAtLocationId { get; init; }
 
     [Required]
     public DateOnly? DateFound { get; init; }

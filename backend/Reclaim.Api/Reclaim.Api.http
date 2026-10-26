@@ -35,6 +35,7 @@ Content-Type: application/json
   "description": "Compact umbrella with a wooden handle",
   "categoryId": 13,
   "foundLocationId": 23,
+  "heldAtLocationId": 106,
   "dateFound": "2026-10-24"
 }
 
@@ -49,6 +50,7 @@ Content-Type: application/json
   "description": "Compact umbrella with a wooden handle",
   "categoryId": 13,
   "foundLocationId": 23,
+  "heldAtLocationId": 106,
   "dateFound": "2026-10-24",
   "status": "disposed"
 }

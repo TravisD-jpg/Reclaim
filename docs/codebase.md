@@ -47,7 +47,7 @@ React (Vite dev server)  ──HTTP/JSON──▶  Reclaim.Api (ASP.NET Core)  �
 ## Database (`database/`)
 
 ### Tables
-There are 9 tables, one script each in `database/tables/`. Column for column they match the Stage 3 schema in [project-spec.md](project-spec.md#relational-schema-pks-listed-first).
+There are 9 tables, one script each in `database/tables/`. Column for column they match the Stage 3 schema in [project-spec.md](project-spec.md#relational-schema-pks-listed-first), plus `Items.held_at_location_id` (see deviations).
 
 The files are numbered `01_Users.sql` … `09_MatchCandidates.sql` in foreign-key order. Run them in filename order.
 
@@ -60,8 +60,8 @@ Table names are unquoted, so Postgres stores them in lowercase (`items`, `lostre
 | File | Fills | Rows | Source |
 |---|---|---|---|
 | `01_Categories.sql` | categories | 13 | Team-defined categories |
-| `02_Locations.sql` | locations | 104 buildings (`room_or_area` NULL) | UA campus map |
-| `03_Items.sql` | items | 400 | Cleaned rows from the Kaggle dataset, with stations mapped to UA buildings; all set to `status = 'stored'`. Dates span 2026-02-19 to 2026-03-21; 10 rows dated Feb 29 (invalid in 2026) were moved to Feb 28. The Kaggle names were generic (114 rows were just "Bag"), so on 2026-10-24 every row got a distinct, realistic name and description (e.g. "Navy JanSport backpack"). Category, building, date and any Kaggle color were kept. New text never gives away the row's secret detail |
+| `02_Locations.sql` | locations | 104 buildings (`room_or_area` NULL) + 3 drop-off desks | UA campus map. The desks (`is_dropoff_point = TRUE`) are the Student Union Information Desk, Bierce Library Circulation Desk and UA Police Department Front Desk, one per seeded staff member |
+| `03_Items.sql` | items | 400 | Cleaned rows from the Kaggle dataset, with stations mapped to UA buildings; all set to `status = 'stored'`. Dates span 2026-02-19 to 2026-03-21; 10 rows dated Feb 29 (invalid in 2026) were moved to Feb 28. The Kaggle names were generic (114 rows were just "Bag"), so on 2026-10-24 every row got a distinct, realistic name and description (e.g. "Navy JanSport backpack"). Category, building, date and any Kaggle color were kept. New text never gives away the row's secret detail. Pickup desk: wallets, electronics, keys, jewelry, documents and cash go to UAPD; bags go to the Student Union (most room); everything else goes to Bierce |
 | `04_Users.sql` | users | 20 | Team-entered accounts: 2 `dev` (Travis, Davonte), 3 `staff` (one per lost-and-found desk), 15 `user` students. UANet-style emails and 7-digit UA IDs. Every demo password is `reclaim`, base64-encoded (see deviations) |
 | `05_ItemSecretDetails.sql` | itemsecretdetails | 40 | Hidden details on seeded items (e.g. "Broken zipper"), matched by item name, building and date found |
 | `06_LostReports.sql` | lostreports | 6 | Filed by 6 different students: 3 `closed` (item returned), 3 `open`. "Navy blue jacket" describes a real stored item, a known answer for Smart Search |
@@ -79,6 +79,7 @@ One-time scripts for databases loaded from an older seed. Not needed on a fresh 
 | File | What it does |
 |---|---|
 | `2026-10-24_distinct_item_names.sql` | Updates the 400 seeded items to the new names and descriptions, matching by `item_id` and the old name, so items created, edited or deleted through the app are skipped. Runs in one transaction. **Run on Neon 2026-10-24:** 399 rows updated; item 13 had been deleted during testing |
+| `2026-10-25_item_pickup_location.sql` | Adds the 3 drop-off desks, adds `items.held_at_location_id`, fills it for every item with the same rule as `03_Items.sql`, then sets it NOT NULL. One transaction. **Run on Neon 2026-10-25:** desks got ids 105 (UAPD), 106 (Student Union), 107 (Bierce); items split 139 UAPD / 156 Union / 105 Bierce |
 
 ### Known issues
 - `Users.role` allows `user`, `staff` and `dev`.
@@ -116,10 +117,10 @@ The schema and seed scripts were tested on PGlite (Postgres 17 compiled to WASM)
 | GET | `/api/categories` | any | All categories, sorted by name (for dropdowns) | categories |
 | GET | `/api/locations` | any | All locations, sorted by building (for dropdowns) | locations |
 | GET | `/api/items` | any | Search items. Optional `search` (partial match on name or description), `categoryId`, `locationId`, `status`. Newest first | items, categories, locations |
-| GET | `/api/items/{id}` | any | One item with its category and building names; 404 if missing | items, categories, locations |
-| GET | `/api/items/{id}/history` | staff* | **The multi-table join.** Item details, category, location, the staff who logged it, its claim (date, claimant, approving staff), the lost report behind the claim, and the failed verification count. All `LEFT JOIN`s, so unclaimed items still return; 404 if missing | items, categories, locations, users (×3), claims, lostreports, verificationattempts |
-| POST | `/api/items` | staff* | Create an item; returns 201 with the new item. 400 on validation errors or a nonexistent category/location | items |
-| PUT | `/api/items/{id}` | staff* | Replace an item's fields; 404 if missing | items |
+| GET | `/api/items/{id}` | any | One item with its category and building names and its pickup desk; 404 if missing | items, categories, locations |
+| GET | `/api/items/{id}/history` | staff* | **The multi-table join.** Item details, category, found location, pickup desk, the staff who logged it, its claim (date, claimant, approving staff), the lost report behind the claim, and the failed verification count. All `LEFT JOIN`s, so unclaimed items still return; 404 if missing | items, categories, locations, users (×3), claims, lostreports, verificationattempts |
+| POST | `/api/items` | staff* | Create an item; returns 201 with the new item. `heldAtLocationId` is required. 400 on validation errors, a nonexistent category/location, or a pickup location that isn't a drop-off point | items, locations |
+| PUT | `/api/items/{id}` | staff* | Replace an item's fields (same checks as POST); 404 if missing | items, locations |
 | DELETE | `/api/items/{id}` | staff* | Delete an item (its secret details cascade); 204, 404 if missing, 409 if it has claims or verification attempts | items |
 
 | GET | `/api/users` | any | All accounts (id, name, email, role), devs then staff then students. Never returns `password_hash`. Feeds the demo's account switch | users |
@@ -178,8 +179,8 @@ React 19 + Vite 8, with **Mantine 9** (components, plus `@mantine/form` for form
 | Route | Page | Who | Status |
 |---|---|---|---|
 | `/` | `CatalogPage` | everyone | Done. Search box (debounced 300 ms), category, building and status filters, all sent to `GET /api/items`. Shows `stored` items by default; table of 25 per page. Clicking a row opens its detail page. Staff see a **Log item** button |
-| `/items/:id` | `ItemDetailPage` | everyone | Done. Shows `GET /api/items/{id}/history`: item details (category, building and room, date found, logged by) and its claim (date, claimant, approving staff, linked lost report). Claimant email and failed verification count show only for staff. Staff also get **Edit** and **Delete** (with a confirm dialog; the API's 409 message shows if the item has claims) |
-| `/items/new`, `/items/:id/edit` | `ItemFormPage` | staff/dev (buttons hidden otherwise) | Done. One form for both: name, description, category, building, date found (native date input), status, photo URL. `POST` or `PUT /api/items`, then opens the item. Status offers only stored/disposed; `claimed` is set by the claims endpoints, so a claimed item's status is locked |
+| `/items/:id` | `ItemDetailPage` | everyone | Done. Shows `GET /api/items/{id}/history`. Stored items show a **Pick up at** banner with the drop-off desk and a note to bring a UA ID. Item details (category, building and room, held at, date found, logged by) and its claim (date, claimant, approving staff, linked lost report). Claimant email and failed verification count show only for staff. Staff also get **Edit** and **Delete** (with a confirm dialog; the API's 409 message shows if the item has claims) |
+| `/items/new`, `/items/:id/edit` | `ItemFormPage` | staff/dev (buttons hidden otherwise) | Done. One form for both: name, description, category, building, held at (required; drop-off desks only), date found (native date input), status, photo URL. `POST` or `PUT /api/items`, then opens the item. Status offers only stored/disposed; `claimed` is set by the claims endpoints, so a claimed item's status is locked |
 | `/lost-reports` | `LostReportsPage` | everyone | Done. Table of reports from `GET /api/lost-reports`, newest first. Staff see every report with a "Reported by" column; everyone else sees only their own (`?userId=`). **Report lost item** button for everyone |
 | `/lost-reports/new` | `LostReportFormPage` | everyone | Done. Name, description, category, last-seen building, date lost. `POST /api/lost-reports` as the "Acting as" account, then back to the list. Status starts `open` |
 | `/claims` | `ClaimsPage` | staff/dev (nav link hidden otherwise) | Placeholder |
@@ -213,7 +214,7 @@ Everyone shares the `production` database, so writes are visible to the whole te
 | Feature (from spec) | Status |
 |---|---|
 | Schema (9 tables) | Done; loaded on Neon |
-| Real data: categories, locations, items | Loaded on Neon (13 / 104 / 400) |
+| Real data: categories, locations, items | Loaded on Neon (13 / 107 / 400), including the 3 drop-off desks |
 | API ↔ Neon connection | Done (`/health/db`) |
 | Test users / secret details | Seeded (20 users, 40 details) |
 | Test lost reports / claims | Seeded (6 reports, 4 claims) |
@@ -233,4 +234,5 @@ Report these in the next stage report.
 | ~10,000 Kaggle records | 400 items seeded | Explain in Stage 4 if it stays this way |
 | Item data comes from the Kaggle dataset (Stage 3 §3) | Category, location and date come from Kaggle, but names and descriptions were rewritten (AI-assisted) because the originals were too generic to tell items apart | Generic names made the catalog unusable and would break Smart Search's text matching. Explain in the Stage 4 report |
 | `Users.role` is `user` or `staff` (Stage 3 schema) | Adds a third role, `dev` | A real deployment needs an admin role above staff to manage staff accounts and the system |
+| `Items` has no pickup location (Stage 3 schema) | Adds `held_at_location_id` NOT NULL, FK to a `Locations` row with `is_dropoff_point = TRUE` (checked by the API) | Users had no way to know where to collect an item; this also puts the unused `is_dropoff_point` column to work. Explain in the Stage 4 report |
 | Passwords hashed with BCrypt.Net-Next (Stage 3 stack) | Seed passwords are base64-encoded, which is reversible | Acceptable for a demo with test accounts only; switch to BCrypt if time allows (roadmap Phase 7) |
